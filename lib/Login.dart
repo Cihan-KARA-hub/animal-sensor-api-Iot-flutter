@@ -1,55 +1,82 @@
-import 'package:cattle_mobile/home.dart';
+import 'package:cattle_mobile/register.dart';
 import 'package:flutter/material.dart';
-
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:cattle_mobile/home.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final Dio dio = Dio(BaseOptions(
+    connectTimeout: Duration(seconds: 10),
+    receiveTimeout: Duration(seconds: 10),
+  ));
 
   Future<void> _login(BuildContext context) async {
-    final String username = usernameController.text;
-    final String password = passwordController.text;
-    const url = 'http://10.192.2.188:8081/login/api/v1/user/login';
+    final String username = usernameController.text.trim();
+    final String password = passwordController.text.trim();
+    const String url = 'http://localhost:8081/api/v1/user/login';
+
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter username and password')),
+        SnackBar(content: Text('Lütfen kullanıcı adı ve şifre girin!')),
       );
       return;
     }
 
     try {
-      final response = await Dio().post(
+      final response = await dio.post(
         url,
         options: Options(headers: {'Content-Type': 'application/json'}),
         data: jsonEncode({'username': username, 'password': password}),
       );
 
       if (response.statusCode == 200) {
+        print('Response data: ${response.data}');
+        print('Response type: ${response.data.runtimeType}');
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => HomePage()),
+          MaterialPageRoute(
+              builder: (context) => HomePage(
+                    companyId: response.data.toString(),
+                  )),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Invalid username or password')),
+          SnackBar(content: Text('Geçersiz kullanıcı adı veya şifre')),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred: $e')),
+        SnackBar(content: Text('Hata oluştu: ${e.toString()}')),
       );
     }
+  }
+
+  @override
+  void dispose() {
+    usernameController.dispose();
+    passwordController.dispose();
+    dio.close();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
+        title: Text('Giriş Yap',
+            style: TextStyle(
+              fontSize: 24,
+              color: Colors.white,
+            )),
+        centerTitle: true,
+        backgroundColor: Colors.blue,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -59,7 +86,7 @@ class LoginPage extends StatelessWidget {
             TextField(
               controller: usernameController,
               decoration: InputDecoration(
-                labelText: 'Username',
+                labelText: 'Kullanıcı Adı',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -68,19 +95,38 @@ class LoginPage extends StatelessWidget {
               controller: passwordController,
               obscureText: true,
               decoration: InputDecoration(
-                labelText: 'Password',
+                labelText: 'Şifre',
                 border: OutlineInputBorder(),
               ),
             ),
             SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => _login(context),
-              child: Text('Login'),
-            ),
+                onPressed: () => _login(context),
+                child: Text('Giriş Yap',
+                    style: TextStyle(
+                      color: Colors.white,
+                    )),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  textStyle: TextStyle(fontSize: 20),
+                )),
+            SizedBox(height: 24),
+            ElevatedButton(
+                onPressed: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => UserFormWidget())),
+                child: Text('Kayıt Ol',
+                    style: TextStyle(
+                      color: Colors.white,
+                    )),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  textStyle: TextStyle(fontSize: 20),
+                )),
           ],
         ),
       ),
     );
   }
 }
-//             },

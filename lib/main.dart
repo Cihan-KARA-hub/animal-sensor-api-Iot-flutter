@@ -1,4 +1,4 @@
-import 'package:cattle_mobile/Login.dart';
+import 'package:cattle_mobile/login.dart';
 import 'package:cattle_mobile/home.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +18,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: HomePage(),
+      debugShowCheckedModeBanner: false,
+      home: LoginPage(),
     );
   }
 }

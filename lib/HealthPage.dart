@@ -38,6 +38,20 @@ class _HealthPageState extends State<HealthPage> {
     }
   }
 
+  Future<void> fetchCallAnimalSensor() async {
+    try {
+      final response = await Dio()
+          .post('http://localhost:8081/api/mqtt/publish/${widget.id}', data: {
+        "message": true,
+        "retained": false,
+        "qos": 1,
+      });
+      print('Animal call fetched successfully: $response');
+    } catch (e) {
+      print('Error call animal health: $e');
+    }
+  }
+
   Future<void> showAddAnimalHealthDialog() async {
     String id = '${widget.id}';
     String veterinarian = '';
@@ -173,6 +187,13 @@ class _HealthPageState extends State<HealthPage> {
                     builder: (context) => SensorPage(animalId: widget.animalId),
                   ),
                 );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.phonelink_ring),
+              tooltip: "Hayvanı Çaldır",
+              onPressed: () {
+                fetchCallAnimalSensor();
               },
             ),
           ],
